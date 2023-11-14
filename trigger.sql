@@ -1,4 +1,32 @@
 -- Exercício
+-- 1.2 Associe um trigger de DELETE à tabela. Quando um DELETE for executado, o trigger
+-- deve atribuir FALSE à coluna ativo das linhas envolvidas. Além disso, o trigger não deve
+-- permitir que nenhuma pessoa seja removida.
+
+-- Criando trigger
+CREATE TRIGGER trg_delete_pessoa
+BEFORE DELETE ON tb_pessoa
+FOR EACH ROW 
+EXECUTE FUNCTION trg_delete_pessoa()
+
+
+-- Criando Função 
+CREATE OR REPLACE FUNCTION trg_delete_pessoa()
+RETURNS TRIGGER 
+LANGUAGE plpgsql AS $$
+BEGIN
+    IF OLD.nao_pode_ser_removida THEN
+        RAISE EXCEPTION 'Não é permitido remover esta pessoa.';
+    ELSE
+        UPDATE tb_pessoa
+        SET ativo = FALSE
+        WHERE cod_pessoa = OLD.cod_pessoa;
+        RETURN OLD;
+    END IF;
+END;
+$$
+
+
 -- 1.1 Adicione uma coluna à tabela tb_pessoa chamada ativo. Ela indica se a pessoa está
 -- ativa no sistema ou não. Ela deve ser capaz de armazenar um valor booleano. Por padrão,
 -- toda pessoa cadastrada no sistema está ativa. Se necessário, consulte o Link 1.1.1.
